@@ -23,8 +23,8 @@ local function json(str)
 		str:gsub(escape('\\"', '\\quote'))
 		:gsub('@', '\\at')
 		:gsub('"([^"]-)"', function(text) -- inside of strings
-				return string.format('"%s@', text:gsub(escape('\\/', '/')))
-			end)
+			return string.format('"%s@', text:gsub(escape('\\/', '/')))
+		end)
 		:gsub('^([^"]-)"', out) -- outside of strings
 		:gsub('@([^"]-)$', out) -- outside of strings
 		:gsub('@([^"]-)"', out) -- outside of strings
