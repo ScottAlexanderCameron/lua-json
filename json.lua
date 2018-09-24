@@ -25,15 +25,20 @@ local function json(str)
 		:gsub('"([^"]-)"', function(text) -- inside of strings
 				return string.format('"%s@', text:gsub(escape('\\/', '/')))
 			end)
-		:gsub('@([^"]-)$', out) -- outside of strings
 		:gsub('^([^"]-)"', out) -- outside of strings
+		:gsub('@([^"]-)$', out) -- outside of strings
 		:gsub('@([^"]-)"', out) -- outside of strings
 		:gsub('^([^"]-)$', out) -- outside of strings
 		:gsub('("[^@]-@)%s*:%s*', '[%1] = ') -- "key" : val => ["key"] = val
 		:gsub(escape('\\u(....)', function(hex) -- unicode code points
-			return '\\' .. table.concat({
+			local bytes = {   -- unicode code points
 				string.byte(utf8.char(tonumber(hex, 16)), 1, 2, 3, 4)
-			}, '\\')
+			}
+			for i, byte in ipairs(bytes) do
+				-- ensure three digits
+				bytes[i] = ('\\%03d'):format(byte)
+			end
+			return table.concat(bytes)
 		end))
 		:gsub('"([^@]-)@', '"%1"')
 		:gsub(escape('\\at', '@'))
