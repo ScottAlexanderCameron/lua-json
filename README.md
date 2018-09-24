@@ -236,53 +236,53 @@ backslashes before the actual escape sequence. This function is called `escape`.
 
 ```lua
 local function json(str)
-	local utf8 = require 'utf8'
+    local utf8 = require 'utf8'
 
-	local function escape(pat, text) -- use to replace escapes
-		return '((\\-)' .. pat .. ')', function(all, prev, ...)
-			if prev:len() % 2 == 0 then
-				return prev .. (type(text) == 'function' and text(...) or text)
-			else
-				return all
-			end
-		end
-	end
+    local function escape(pat, text) -- use to replace escapes
+        return '((\\-)' .. pat .. ')', function(all, prev, ...)
+            if prev:len() % 2 == 0 then
+                return prev .. (type(text) == 'function' and text(...) or text)
+            else
+                return all
+            end
+        end
+    end
 
-	local function out(text) -- outside of strings
-		return text:gsub('%[','{')
-		:gsub('%]','}')
-		:gsub('null','nil')
-		:gsub('//','--')
-	end
+    local function out(text) -- outside of strings
+        return text:gsub('%[','{')
+        :gsub('%]','}')
+        :gsub('null','nil')
+        :gsub('//','--')
+    end
 
-	return setfenv(assert(loadstring('return '..
-		str:gsub(escape('\\"', '\\quote'))              -- step 1
-		:gsub('@', '\\at')                              -- step 2
-		:gsub('"([^"]-)"', function(text)               -- step 3
-			return string.format('"%s@', text:gsub(escape('\\/', '/')))
-		end)
-		:gsub('^([^"]-)"', out)                         -- step 4
-		:gsub('@([^"]-)$', out)                         -- step 4
-		:gsub('@([^"]-)"', out)                         -- step 4
-		:gsub('^([^"]-)$', out)                         -- step 4
-		:gsub('("[^@]-@)%s*:%s*', '[%1] = ')            -- step 5
-		:gsub(escape('\\u(....)', function(hex)         -- step 6
-			local bytes = {   -- unicode code points
-				string.byte(utf8.char(tonumber(hex, 16)), 1, 2, 3, 4)
-			}
-			for i, byte in ipairs(bytes) do
-				-- ensure three digits
-				bytes[i] = ('\\%03d'):format(byte)
-			end
-			return table.concat(bytes)
-		end))
-		:gsub('"([^@]-)@', '"%1"')                      -- step 7
-		:gsub(escape('\\at', '@'))                      -- step 7
-		:gsub(escape('\\quote', '\\"'))                 -- step 7
-		)), setmetatable({}, {
-			__index = function(self, name)
-				error("invalid value :`" .. name .. '`')
-			end
-		}))()
+    return setfenv(assert(loadstring('return '..
+        str:gsub(escape('\\"', '\\quote'))              -- step 1
+        :gsub('@', '\\at')                              -- step 2
+        :gsub('"([^"]-)"', function(text)               -- step 3
+            return ('"%s@').format(text:gsub(escape('\\/', '/')))
+        end)
+        :gsub('^([^"]-)"', out)                         -- step 4
+        :gsub('@([^"]-)$', out)                         -- step 4
+        :gsub('@([^"]-)"', out)                         -- step 4
+        :gsub('^([^"]-)$', out)                         -- step 4
+        :gsub('("[^@]-@)%s*:%s*', '[%1] = ')            -- step 5
+        :gsub(escape('\\u(....)', function(hex)         -- step 6
+            local bytes = {   -- unicode code points
+                string.byte(utf8.char(tonumber(hex, 16)), 1, 2, 3, 4)
+            }
+            for i, byte in ipairs(bytes) do
+                -- ensure three digits
+                bytes[i] = ('\\%03d'):format(byte)
+            end
+            return table.concat(bytes)
+        end))
+        :gsub('"([^@]-)@', '"%1"')                      -- step 7
+        :gsub(escape('\\at', '@'))                      -- step 7
+        :gsub(escape('\\quote', '\\"'))                 -- step 7
+        )), setmetatable({}, {
+            __index = function(self, name)
+                error("invalid value :`" .. name .. '`')
+            end
+        }))()
 end
 ```
