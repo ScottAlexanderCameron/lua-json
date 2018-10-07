@@ -25,9 +25,9 @@ local function json(str)
 		:gsub('"([^"]-)"', function(text) -- inside of strings
 			return ('"%s@'):format(text:gsub(escape('\\/', '/')))
 		end)
-		:gsub('^([^"]-)"', out) -- outside of strings
-		:gsub('@([^"]-)$', out) -- outside of strings
-		:gsub('@([^"]-)"', out) -- outside of strings
+		:gsub('^([^"]-")', out) -- outside of strings
+		:gsub('(@[^"]-")', out) -- outside of strings
+		:gsub('(@[^"]-)$', out) -- outside of strings
 		:gsub('^([^"]-)$', out) -- outside of strings
 		:gsub('("[^@]-@)%s*:%s*', '[%1] = ') -- "key" : val => ["key"] = val
 		:gsub(escape('\\u(....)', function(hex) -- unicode code points

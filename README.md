@@ -261,9 +261,9 @@ local function json(str)
         :gsub('"([^"]-)"', function(text)               -- step 3
             return ('"%s@'):format(text:gsub(escape('\\/', '/')))
         end)
-        :gsub('^([^"]-)"', out)                         -- step 4
-        :gsub('@([^"]-)$', out)                         -- step 4
-        :gsub('@([^"]-)"', out)                         -- step 4
+        :gsub('^([^"]-")', out)                         -- step 4
+        :gsub('(@[^"]-")', out)                         -- step 4
+        :gsub('(@[^"]-)$', out)                         -- step 4
         :gsub('^([^"]-)$', out)                         -- step 4
         :gsub('("[^@]-@)%s*:%s*', '[%1] = ')            -- step 5
         :gsub(escape('\\u(....)', function(hex)         -- step 6
